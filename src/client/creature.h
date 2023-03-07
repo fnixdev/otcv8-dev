@@ -75,6 +75,7 @@ public:
     void setIconTexture(const std::string& filename);
     void setPassable(bool passable) { m_passable = passable; }
     void setSpeedFormula(double speedA, double speedB, double speedC);
+    void setLocalPlayerSummon(bool localPlayerSummon) { m_localPlayerSummon = localPlayerSummon; }
 
     void addTimedSquare(uint8 color);
     void removeTimedSquare() { m_showTimedSquare = false; }
@@ -128,6 +129,7 @@ public:
     virtual int getDisplacementY();
     virtual int getExactSize(int layer = 0, int xPattern = 0, int yPattern = 0, int zPattern = 0, int animationPhase = 0);
     PointF getJumpOffset() { return m_jumpOffset; }
+    bool isLocalPlayerSummon() { return m_localPlayerSummon; }
     bool isTimedSquareVisible() { return m_showTimedSquare; }
     Color getTimedSquareColor() { return m_timedSquareColor; }
     bool isStaticSquareVisible() { return m_showStaticSquare; }
@@ -245,6 +247,7 @@ protected:
     Color m_outfitColor;
     ScheduledEventPtr m_outfitColorUpdateEvent;
     Timer m_outfitColorTimer;
+    stdext::boolean<false> m_localPlayerSummon;
     CachedText m_titleCache;
     Color m_titleColor;
 
