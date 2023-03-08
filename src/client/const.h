@@ -70,11 +70,12 @@ namespace Otc
         DrawManaBar = 32768,
         DontDrawLocalPlayer = 65536,
         DrawIcons = 131072,
+        DrawExperienceBars = 32768,
         DrawWalls = DrawOnBottom | DrawOnTop,
         DrawEverything = DrawGround | DrawGroundBorders | DrawWalls | DrawItems |
                          DrawCreatures | DrawEffects | DrawMissiles | DrawCreaturesInformation |
                          DrawStaticTexts | DrawAnimatedTexts | DrawAnimations | DrawBars | DrawNames |
-                         DrawLights | DrawManaBar | DrawIcons
+                         DrawLights | DrawManaBar | DrawIcons | DrawExperienceBars
     };
 
     enum DatOpts {

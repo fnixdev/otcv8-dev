@@ -103,6 +103,9 @@ public:
     void setDrawManaBar(bool enable) { m_drawManaBar = enable; }
     bool isDrawingManaBar() { return m_drawManaBar; }
 
+    void setDrawExperienceBars(bool enable) { m_drawExperienceBars = enable; }
+    bool isDrawingExperienceBars() { return m_drawExperienceBars; }
+
     void setDrawPlayerBars(bool enable) { m_drawPlayerBars = enable; }
 
     void move(int x, int y);
@@ -153,6 +156,7 @@ private:
     stdext::boolean<true> m_drawHealthBars;
     stdext::boolean<false> m_drawHealthBarsOnTop;
     stdext::boolean<true> m_drawManaBar;
+    stdext::boolean<true> m_drawExperienceBars;
     bool m_drawPlayerBars = true;
     stdext::boolean<true> m_smooth;
 

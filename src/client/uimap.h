@@ -59,6 +59,7 @@ public:
     void setDrawHealthBarsOnTop(bool enable) { m_mapView->setDrawHealthBarsOnTop(enable); }
     void setDrawLights(bool enable) { m_mapView->setDrawLights(enable); }
     void setDrawManaBar(bool enable) { m_mapView->setDrawManaBar(enable); }
+    void setDrawExperienceBars(bool enable) { m_mapView->setDrawExperienceBars(enable); }
     void setDrawPlayerBars(bool enable) { m_mapView->setDrawPlayerBars(enable); }
     void setAnimated(bool enable) { m_mapView->setAnimated(enable); }
     void setKeepAspectRatio(bool enable);

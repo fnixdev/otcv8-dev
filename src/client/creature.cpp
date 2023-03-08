@@ -260,6 +260,51 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
         }
     }
 
+	if (drawFlags & Otc::DrawBars && isLocalPlayerSummon()) {
+        Rect expBackgroundRect = Rect(backgroundRect.x(), backgroundRect.y() + 5, 27, 4);
+        expBackgroundRect.bind(parentRect);
+
+        Rect expRect = expBackgroundRect.expanded(-1);
+        expRect.setWidth((g_game.getLocalPlayer()->getMagicLevelPercent() / 100.0) * 25);
+
+        g_painter->setColor(Color(0x66, 0xcc, 0xff));
+        g_painter->drawFilledRect(expRect);
+        ImagePtr backgroundExpBar = Image::load("data/images/new_bar.png");
+        TexturePtr bgExpBar = TexturePtr(new Texture(backgroundExpBar, false));
+        g_painter->drawTexturedRect(expBackgroundRect, bgExpBar);
+	}
+
+    if(drawFlags & Otc::DrawExperienceBars) {
+        if(isLocalPlayer()) {
+            Rect expBackgroundRect = Rect(backgroundRect.x(), backgroundRect.y() + 5, 27, 4);
+            expBackgroundRect.bind(parentRect);
+
+            Rect expRect = expBackgroundRect.expanded(-1);
+            expRect.setWidth((g_game.getLocalPlayer()->getLevelPercent() / 100.0) * 25);
+
+            g_painter->setColor(Color::black);
+            g_painter->drawFilledRect(expBackgroundRect);
+
+            g_painter->setColor(Color(0x66, 0xcc, 0xff));
+            g_painter->drawFilledRect(expRect);
+        }
+        else if(isLocalPlayerSummon()) {
+            Rect expBackgroundRect = Rect(backgroundRect.x(), backgroundRect.y() + 5, 27, 4);
+            expBackgroundRect.bind(parentRect);
+
+            Rect expRect = expBackgroundRect.expanded(-1);
+            expRect.setWidth((g_game.getLocalPlayer()->getMagicLevelPercent() / 100.0) * 25);
+
+            g_painter->setColor(Color::black);
+            g_painter->drawFilledRect(expBackgroundRect);
+
+            g_painter->setColor(Color(0x66, 0xcc, 0xff));
+            g_painter->drawFilledRect(expRect);
+        }
+    }
+
+
+
     if (drawFlags & Otc::DrawNames) {
         m_nameCache.draw(textRect, fillColor);
 
