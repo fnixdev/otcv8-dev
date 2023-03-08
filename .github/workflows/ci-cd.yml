@@ -50,8 +50,8 @@ jobs:
 
     #- name: Sign binaries
     #  run: |
-    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "OTclientV8" otclient_gl.exe
-    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "OTclientV8" otclient_dx.exe
+    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "otclient" otclient_gl.exe
+    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "otclient" otclient_dx.exe
 
     - name: Upload binaries
       uses: 'actions/upload-artifact@v2'
@@ -112,121 +112,14 @@ jobs:
       with:
         name: Binaries
         path: |
-          otclientv8.apk
+          otclient.apk
         if-no-files-found: error
 
-  Mac:
-    name: Build mac os version
-    runs-on: 	macos-11
-    timeout-minutes: 60
-    if: |
-      !contains(github.event.head_commit.message, '[skip release]')
-      && (
-        startsWith(github.ref, 'refs/tags/')
-        || github.ref == 'refs/heads/main'
-        || github.ref == 'refs/heads/master'
-      )
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
-
-    - name: Get latest CMake
-      uses: lukka/get-cmake@latest
-
-    - name: MacOS - install physfs pkgconfig luajit xquartz
-      run: brew install physfs pkgconfig luajit xquartz
-
-    - name: Run vcpkg
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgArguments: >
-          boost-iostreams boost-asio boost-system boost-variant boost-lockfree boost-beast glew 
-          boost-filesystem boost-uuid libogg libvorbis zlib opengl libzip openal-soft bzip2
-          boost-process openssl
-        vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
-        vcpkgTriplet: x64-osx
-        vcpkgGitCommitId: 761c81d43335a5d5ccc2ec8ad90bd7e2cbba734e
-
-    - name: Build with CMake
-      uses: lukka/run-cmake@v3
-      with:
-        buildDirectory: ${{ runner.workspace }}/build
-        cmakeAppendedArgs: '-G Ninja -DCMAKE_BUILD_TYPE="Release" -DVERSION=${{github.run_number}} -DCMAKE_CXX_FLAGS="-Wno-c++11-narrowing"'
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        useVcpkgToolchainFile: true
-
-    - name: Change name
-      run: |
-        mv '${{ runner.workspace }}/build/otclient' '${{ runner.workspace }}/build/otclient_mac'
-
-    - name: Upload otclient
-      uses: actions/upload-artifact@v2
-      with:
-        name: Binaries
-        path: |
-          ${{ runner.workspace }}/build/otclient_mac
-        if-no-files-found: error
-
-  Linux:
-    name: Build linux version
-    runs-on: ubuntu-20.04
-    timeout-minutes: 60
-    if: |
-      !contains(github.event.head_commit.message, '[skip release]')
-      && (
-        startsWith(github.ref, 'refs/tags/')
-        || github.ref == 'refs/heads/main'
-        || github.ref == 'refs/heads/master'
-      )
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
-
-    - name: Get latest CMake
-      uses: lukka/get-cmake@latest
-
-    - name: Ubuntu - install opengl lua5.1 luajit
-      run: sudo apt update && sudo apt install -y libglew-dev liblua5.1-0-dev libluajit-5.1-dev
-
-    - name: Run vcpkg
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgArguments: >
-          boost-iostreams boost-asio boost-system boost-variant boost-lockfree boost-beast glew 
-          boost-filesystem boost-uuid libogg libvorbis zlib opengl libzip openal-soft bzip2
-          boost-process openssl physfs
-        vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
-        vcpkgTriplet: x64-linux
-        vcpkgGitCommitId: 761c81d43335a5d5ccc2ec8ad90bd7e2cbba734e
-
-    - name: Build with CMake
-      uses: lukka/run-cmake@v3
-      with:
-        buildDirectory: ${{ runner.workspace }}/build
-        cmakeAppendedArgs: '-G Ninja -DCMAKE_BUILD_TYPE="Release" -DVERSION=${{github.run_number}}'
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        useVcpkgToolchainFile: true
-
-    - name: Change name
-      run: |
-        mv '${{ runner.workspace }}/build/otclient' '${{ runner.workspace }}/build/otclient_linux'
-
-    - name: Upload otclient
-      uses: actions/upload-artifact@v2
-      with:
-        name: Binaries
-        path: |
-          ${{ runner.workspace }}/build/otclient_linux
-        if-no-files-found: error
 
   Release:
     name: Test and release
     runs-on: windows-2019
-    needs: [Windows, Android, Mac, Linux]
+    needs: [Windows, Android]
     timeout-minutes: 120
     if: |
       !contains(github.event.head_commit.message, '[skip release]')
@@ -251,16 +144,16 @@ jobs:
       run: |
         7z x tests.7z -aoa
         $process = (Start-Process -Wait -PassThru otclient_dx.exe --test)
-        Get-Content otclientv8.log
+        Get-Content otclient.log
         if ($process.ExitCode -ne 0) {
           throw "Invalid exit code: " + $process.ExitCode;
         }
 
-    - name: Upload otclientv8.log
+    - name: Upload otclient.log
       uses: actions/upload-artifact@v2
       with:
-        path: otclientv8.log
-        name: Download-otclientv8.log
+        path: otclient.log
+        name: Download-otclient.log
         if-no-files-found: error
 
     - name: Copy screenshots
@@ -276,12 +169,12 @@ jobs:
             quality=50,
           )
         "@
-        cd $env:appdata\otclientv8\otclientv8
+        cd $env:appdata\otclient\otclient
         pip3 install pillow
         python3 -c $pillowScript
         cd $location
         mkdir screenshots
-        Get-ChildItem $env:appdata\otclientv8\otclientv8 -Filter *.jpg `
+        Get-ChildItem $env:appdata\otclient\otclient -Filter *.jpg `
         | Copy-Item -Destination screenshots -Force -PassThru
 
     - name: Upload screenshot
@@ -296,7 +189,7 @@ jobs:
 
     - name: Set version
       run: |
-        $version = Select-String -path otclientv8.log '(OTCv8 [^(]+)' |
+        $version = Select-String -path otclient.log '(OTCv8 [^(]+)' |
           select-object -First 1 |
           % { $_.Matches } |
           % { $_.Value }
@@ -305,13 +198,11 @@ jobs:
     - name: Upload otclient
       uses: actions/upload-artifact@v2
       with:
-        name: Download-otclientv8
+        name: Download-otclient
         path: |
           otclient_gl.exe
           otclient_dx.exe
-          otclientv8.apk
-          otclient_mac
-          otclient_linux
+          otclient.apk
           *.dll
           data
           modules
@@ -320,44 +211,42 @@ jobs:
           init.lua
         if-no-files-found: error
 
-    - name: Checkout public otclientv8
+    - name: Checkout public otclient
       uses: actions/checkout@v2
       with:
-        repository: OTCv8/otclientv8
-        path: otclientv8
+        repository: fnixdev/otclient
+        path: otclient
         submodules: recursive
         token: "${{ secrets.otcv8_token }}"
 
-    - name: Update public otclientv8 files
+    - name: Update public otclient files
       run: |
-        cd otclientv8
+        cd otclient
         git rm . -f -r --ignore-unmatch
         git checkout HEAD -- README.md LICENSE
         cd ..
 
         robocopy `
         . `
-        otclientv8 `
+        otclient `
         init.lua `
         otclient_dx.exe `
         otclient_gl.exe `
-        otclientv8.apk `
-        otclient_linux `
-        otclient_mac `
+        otclient.apk `
         libGLESv2.dll `
         libEGL.dll `
         d3dcompiler_47.dll
 
-        robocopy data otclientv8/data /s
-        robocopy layouts otclientv8/layouts /s
-        robocopy mods otclientv8/mods /s
-        robocopy modules otclientv8/modules /s
+        robocopy data otclient/data /s
+        robocopy layouts otclient/layouts /s
+        robocopy mods otclient/mods /s
+        robocopy modules otclient/modules /s
         exit 0 # required, robocopy has exit code 1
 
-    - name: Commit public otclientv8
+    - name: Commit public otclient
       uses: EndBug/add-and-commit@v7
       with:
-        cwd: otclientv8
+        cwd: otclient
         push: true
         author_name: OTCv8
         author_email: otclient@otclient.ovh
