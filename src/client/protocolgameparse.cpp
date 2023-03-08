@@ -1369,7 +1369,7 @@ void ProtocolGame::parseOpenNpcTrade(const InputMessagePtr& msg)
 
     for (int i = 0; i < listCount; ++i) {
         uint16 itemId = msg->getU16();
-        uint8 count = msg->getU8();
+        uint16 count = g_game.getFeature(Otc::GameCountU16) ? msg->getU16() : msg->getU8();
 
         ItemPtr item = Item::create(itemId);
         item->setCountOrSubType(count);
