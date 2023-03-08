@@ -50,8 +50,8 @@ jobs:
 
     #- name: Sign binaries
     #  run: |
-    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "otclient" otclient_gl.exe
-    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "otclient" otclient_dx.exe
+    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "OTclientV8" otclient_gl.exe
+    #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "OTclientV8" otclient_dx.exe
 
     - name: Upload binaries
       uses: 'actions/upload-artifact@v2'
@@ -112,7 +112,7 @@ jobs:
       with:
         name: Binaries
         path: |
-          otclient.apk
+          otclientv8.apk
         if-no-files-found: error
 
 
@@ -144,16 +144,16 @@ jobs:
       run: |
         7z x tests.7z -aoa
         $process = (Start-Process -Wait -PassThru otclient_dx.exe --test)
-        Get-Content otclient.log
+        Get-Content otclientv8.log
         if ($process.ExitCode -ne 0) {
           throw "Invalid exit code: " + $process.ExitCode;
         }
 
-    - name: Upload otclient.log
+    - name: Upload otclientv8.log
       uses: actions/upload-artifact@v2
       with:
-        path: otclient.log
-        name: Download-otclient.log
+        path: otclientv8.log
+        name: Download-otclientv8.log
         if-no-files-found: error
 
     - name: Copy screenshots
@@ -169,12 +169,12 @@ jobs:
             quality=50,
           )
         "@
-        cd $env:appdata\otclient\otclient
+        cd $env:appdata\otclientv8\otclientv8
         pip3 install pillow
         python3 -c $pillowScript
         cd $location
         mkdir screenshots
-        Get-ChildItem $env:appdata\otclient\otclient -Filter *.jpg `
+        Get-ChildItem $env:appdata\otclientv8\otclientv8 -Filter *.jpg `
         | Copy-Item -Destination screenshots -Force -PassThru
 
     - name: Upload screenshot
@@ -189,7 +189,7 @@ jobs:
 
     - name: Set version
       run: |
-        $version = Select-String -path otclient.log '(OTCv8 [^(]+)' |
+        $version = Select-String -path otclientv8.log '(OTCv8 [^(]+)' |
           select-object -First 1 |
           % { $_.Matches } |
           % { $_.Value }
@@ -198,11 +198,11 @@ jobs:
     - name: Upload otclient
       uses: actions/upload-artifact@v2
       with:
-        name: Download-otclient
+        name: Download-otclientv8
         path: |
           otclient_gl.exe
           otclient_dx.exe
-          otclient.apk
+          otclientv8.apk
           *.dll
           data
           modules
@@ -211,42 +211,42 @@ jobs:
           init.lua
         if-no-files-found: error
 
-    - name: Checkout public otclient
+    - name: Checkout public otclientv8
       uses: actions/checkout@v2
       with:
-        repository: fnixdev/otclient
-        path: otclient
+        repository: fnixdev/otclientv8
+        path: otclientv8
         submodules: recursive
         token: "${{ secrets.otcv8_token }}"
 
-    - name: Update public otclient files
+    - name: Update public otclientv8 files
       run: |
-        cd otclient
+        cd otclientv8
         git rm . -f -r --ignore-unmatch
         git checkout HEAD -- README.md LICENSE
         cd ..
 
         robocopy `
         . `
-        otclient `
+        otclientv8 `
         init.lua `
         otclient_dx.exe `
         otclient_gl.exe `
-        otclient.apk `
+        otclientv8.apk `
         libGLESv2.dll `
         libEGL.dll `
         d3dcompiler_47.dll
 
-        robocopy data otclient/data /s
-        robocopy layouts otclient/layouts /s
-        robocopy mods otclient/mods /s
-        robocopy modules otclient/modules /s
+        robocopy data otclientv8/data /s
+        robocopy layouts otclientv8/layouts /s
+        robocopy mods otclientv8/mods /s
+        robocopy modules otclientv8/modules /s
         exit 0 # required, robocopy has exit code 1
 
-    - name: Commit public otclient
+    - name: Commit public otclientv8
       uses: EndBug/add-and-commit@v7
       with:
-        cwd: otclient
+        cwd: otclientv8
         push: true
         author_name: OTCv8
         author_email: otclient@otclient.ovh
